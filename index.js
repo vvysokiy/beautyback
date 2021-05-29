@@ -10,6 +10,12 @@ const port = 3000;
 
 app
   .use(cookieParser())
+  .use((req, res, next) => {
+    res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.header("Pragma", "no-cache");
+    res.header("Expires", 0);
+    next();
+  })
   .get('/', (req, res) => {
     res.send('Hello World!!!')
   })
