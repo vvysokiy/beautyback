@@ -1,31 +1,12 @@
-const USERS = {
-  'root': {
-    login: 'root',
-    password: 'root',
-    type: 1,
-  },
-  'sasha': {
-    login: 'sasha',
-    password: 'test',
-    type: 1,
-  }
-}
+const {
+  addSID,
+  removeSID,
+  getSID,
+  addUser,
+  getUser,
+} = require('../../db/users');
 
 const MAX_AGE = 60 * 60 * 24 * 30 * 1000;
-const SESSIONS = {};
-
-/**
- * Получение пользователя по его логин/паролю
- * @param login - логин пользователя
- * @param password - пароль пользователя
- */
-const getUser = (login, password) => {
-  const userObj = USERS[login];
-  if (userObj && userObj.password === password) {
-    return true;
-  }
-  return false;
-}
 
 /**
  * Создание сессионной куки для пользователя
@@ -42,28 +23,20 @@ const createSID = (login, password) => {
  * @param sid - сессионная кука
  * @param res - объект ответа express
  */
-const addSID = (sid, res) => {
-  SESSIONS[sid] = true;
+const addCookieSID = (sid, userObj, res) => {
+  addSID(sid, userObj);
   res.cookie('sid', sid, { maxAge: MAX_AGE });
 };
 
 /**
- * Добавление сессионой куки (SID)
+ * Удаление сессионой куки (SID)
  * @param sid - сессионная кука
  * @param res - объект ответа express
  */
-const removeSID = (sid, res) => {
-  if (SESSIONS[sid]) {
-    SESSIONS[sid] = false;
-  };
-  res.clearCookie('sid')
+const removeCookieSID = (sid, res) => {
+  removeSID(sid);
+  res.clearCookie('sid');
 };
-
-/**
- * Валидация сессионой куки (SID)
- * @param sid - сессионная кука
- */
-const validateSID = (sid) => Boolean(SESSIONS[sid]);
 
 /**
  * Ручка авторизации
@@ -73,14 +46,14 @@ const validateSID = (sid) => Boolean(SESSIONS[sid]);
 const routeLogin = (req, res) => {
   const { login, password } = req.query;
 
-  const loginSuccessfully = getUser(login, password);
-  if (loginSuccessfully) {
-    const SID = createSID(login, password);
-    addSID(SID, res);
-    res.status(200).send(loginSuccessfully);
+  const userObj = getUser(login, password);
+  if (userObj) {
+    const SID = createSID(userObj.login, userObj.password);
+    addCookieSID(SID, userObj, res);
+    res.status(200).send(userObj);
   } else {
     const { sid } = req.cookies;
-    removeSID(sid, res);
+    removeCookieSID(sid, res);
 
     res.status(404).send({
       msg: 'incorrect username or password'
@@ -96,8 +69,10 @@ const routeLogin = (req, res) => {
 const routeLogout = (req, res) => {
   const { sid } = req.cookies;
 
-  removeSID(sid, res);
-  res.status(200).send();
+  removeCookieSID(sid, res);
+  res.status(200).send({
+    msg: 'sid was deleted'
+  });
 };
 
 /**
@@ -107,20 +82,46 @@ const routeLogout = (req, res) => {
  */
 const routeValidateSID = (req, res, next) => {
   const { sid } = req.cookies;
-  console.log('routeValidateSID', sid);
-  console.log('validateSID(sid)', validateSID(sid));
 
-  if (!validateSID(sid)) {
+  const userObj = getSID(sid)
+
+  if (!userObj) {
     res.status(404).send({
       msg: 'user is not login'
     });
   } else {
+    req.db = {
+      user: userObj
+    }
     next();
   };
 };
 
+/**
+ * Ручка регистрации нового пользователя
+ * @param req - объект запроса express
+ * @param res - объект ответа express
+ */
+const routeRegistration = (req, res) => {
+  const { login, password } = req.query;
+
+  const userObj = getUser(login, password);
+  if (userObj) {
+    res.status(404).send({
+      msg: 'user already exists'
+    });
+  } else {
+    const newUserObj = addUser(login, password);
+    const SID = createSID(newUserObj.login, newUserObj.password);
+    addCookieSID(SID, newUserObj, res);
+    res.status(200).send(newUserObj);
+  }
+};
+
+
 module.exports = {
   routeLogin,
   routeLogout,
+  routeRegistration,
   routeValidateSID,
 };

@@ -1,7 +1,9 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 
 const authorization = require('./src/routes/authorization');
+const calendar = require('./src/routes/calendar');
 const cosmeticBag = require('./src/routes/cosmetic-bag');
 
 
@@ -9,6 +11,7 @@ const app = express();
 const port = 3000;
 
 app
+  .use(bodyParser.json())
   .use(cookieParser())
   .use((req, res, next) => {
     res.header("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -21,6 +24,7 @@ app
   })
   .use(authorization)
   .use(cosmeticBag)
+  .use(calendar)
   .listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
   })
