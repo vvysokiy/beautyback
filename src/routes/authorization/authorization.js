@@ -25,7 +25,8 @@ const createSID = (login, password) => {
  */
 const addCookieSID = (sid, userObj, res) => {
   addSID(sid, userObj);
-  res.cookie('sid', sid, { maxAge: MAX_AGE });
+  res.cookie('sid', sid, { maxAge: MAX_AGE, domain: 'localhost:3000' });
+  res.cookie('sid1', sid, { maxAge: MAX_AGE, domain: 'localhost' });
 };
 
 /**
