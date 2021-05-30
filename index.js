@@ -11,7 +11,7 @@ const cosmeticBag = require('./src/routes/cosmetic-bag');
 const app = express();
 const port = 3000;
 
-var whitelist = ['http://localhost', 'http://localhost:3000']
+var whitelist = ['http://localhost/', 'http://localhost:3000/', 'http://46.101.160.28/']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
@@ -19,7 +19,8 @@ var corsOptions = {
     } else {
       callback(new Error('Not allowed by CORS'))
     }
-  }
+  },
+  credentials: true,
 }
 
 app
