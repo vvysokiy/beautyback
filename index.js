@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const cors = require('cors')
 
 const authorization = require('./src/routes/authorization');
 const calendar = require('./src/routes/calendar');
@@ -11,6 +12,7 @@ const app = express();
 const port = 3000;
 
 app
+  .use(cors())
   .use(bodyParser.json())
   .use(cookieParser())
   .use((req, res, next) => {
