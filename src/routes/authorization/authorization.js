@@ -81,7 +81,10 @@ const routeLogout = (req, res) => {
  * @param res - объект ответа express
  */
 const routeValidateSID = (req, res, next) => {
-  const { sid } = req.cookies;
+  let { sid } = req.cookies;
+  if (sid) {
+    sid = req.headers['session-id']
+  }
 
   const userObj = getSID(sid)
 
