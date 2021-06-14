@@ -25,8 +25,7 @@ const createSID = (login, password) => {
  */
 const addCookieSID = (sid, userObj, res) => {
   addSID(sid, userObj);
-  res.cookie('sid', sid, { maxAge: MAX_AGE, domain: 'localhost:3000' });
-  res.cookie('sid1', sid, { maxAge: MAX_AGE, domain: 'localhost' });
+  res.cookie('sid', sid, { maxAge: MAX_AGE, domain: 'localhost:3000', });
 };
 
 /**
@@ -51,7 +50,7 @@ const routeLogin = (req, res) => {
   if (userObj) {
     const SID = createSID(userObj.login, userObj.password);
     addCookieSID(SID, userObj, res);
-    res.status(200).send(userObj);
+    res.status(200).send({ ...userObj, sid: SID });
   } else {
     const { sid } = req.cookies;
     removeCookieSID(sid, res);

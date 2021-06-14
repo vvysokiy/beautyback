@@ -9,7 +9,7 @@ const cosmeticBag = require('./src/routes/cosmetic-bag');
 
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 var corsOptions = {
   origin: ['http://localhost', 'http://localhost:3000', 'http://46.101.160.28'],
