@@ -82,7 +82,7 @@ const routeLogout = (req, res) => {
  */
 const routeValidateSID = (req, res, next) => {
   let { sid } = req.cookies;
-  if (sid) {
+  if (!sid) {
     sid = req.headers['session-id']
   }
 
